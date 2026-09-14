@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienestar Universitario - Citas</title>
+  
+  <!-- Fuentes e Íconos (FontAwesome) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Enlace al archivo CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Barra Superior -->
+  <header id="main-header" class="hidden">
+    <div class="brand">
+      <div class="brand-icon"><i class="fa-solid fa-staff-snake"></i></div>
+      <span>Bienestar Universitario</span>
+    </div>
+    <div class="user-nav">
+      <span class="user-greeting" id="greeting-text">Hola, bienvenido</span>
+      <button class="btn-logout" id="btn-logout">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Salir
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- LOGIN (Split Screen) -->
+    <section id="login-screen" class="login-wrapper">
+      <!-- Lado izquierdo: Imagen del edificio -->
+      <div class="login-image-side"></div>
+      
+      <!-- Lado derecho: Formulario -->
+      <div class="login-form-side">
+        <div class="login-card">
+          <div class="login-header-brand">
+            <!-- Escudo de la universidad -->
+            <img src="escudounimag.png" alt="Escudo Universidad" class="login-logo">
+            <h2>Portal de Salud</h2>
+            <p>Bienestar Universitario</p>
+          </div>
+
+          <form id="login-form">
+            <div class="form-group">
+              <label for="login-email"><i class="fa-solid fa-envelope"></i> Correo Institucional</label>
+              <input type="email" id="login-email" placeholder="ejemplo@estudiante.com" required>
+            </div>
+
+            <!-- Listado de Usuarios Mockeados -->
+            <details class="mock-users-details">
+              <summary><i class="fa-solid fa-circle-info"></i> Ver usuarios de prueba disponibles</summary>
+              <div class="mock-users-content">
+                <strong>Estudiantes:</strong>
+                <ul>
+                  <li>carlos@estudiante.com</li>
+                  <li>andrea@estudiante.com</li>
+                </ul>
+                <strong>Profesionales:</strong>
+                <ul>
+                  <li>marta.gomez@profesional.com (Medicina)</li>
+                  <li>roberto.silva@profesional.com (Medicina)</li>
+                  <li>laura.morales@profesional.com (Psicología)</li>
+                  <li>viviana.cruz@profesional.com (Odontología)</li>
+                </ul>
+              </div>
+            </details>
+
+            <button type="submit" class="btn-primary">
+              <i class="fa-solid fa-right-to-bracket"></i> Entrar al Sistema
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD ESTUDIANTE -->
+    <section id="student-dashboard" class="hidden dashboard-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-book">
+          <i class="fa-solid fa-calendar-plus"></i> Apartar Cita
+        </button>
+        <button class="tab-btn" data-tab="tab-history">
+          <i class="fa-solid fa-clock-rotate-left"></i> Mis Citas
+        </button>
+      </div>
+
+      <!-- Apartar Cita -->
+      <div id="tab-book" class="tab-content">
+        <div class="filter-card">
+          <h3 class="section-title"><i class="fa-solid fa-stethoscope"></i> Reserva de Atención</h3>
+          <div class="filter-grid">
+            <div class="form-group">
+              <label for="service-select">1. Especialidad Obligatoria *</label>
+              <select id="service-select">
+                <option value="">-- Elige Especialidad --</option>
+                <option value="Medicina General">Medicina General</option>
+                <option value="Psicología">Psicología</option>
+                <option value="Odontología">Odontología</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="date-select">2. Fecha de Consulta *</label>
+              <input type="date" id="date-select">
+            </div>
+            <div class="form-group">
+              <label for="prof-filter">3. Profesional (Opcional)</label>
+              <select id="prof-filter" disabled>
+                <option value="">Todos los profesionales</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <h4 class="slots-title">Horarios Disponibles</h4>
+        <div id="slots-container" class="slots-grid"></div>
+      </div>
+
+      <!-- Mis Citas -->
+      <div id="tab-history" class="tab-content hidden">
+        <h3 class="section-title">Mi Historial de Citas</h3>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Especialidad</th>
+                <th>Profesional</th>
+                <th>Fecha y Hora</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="student-history-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD PROFESIONAL -->
+    <section id="professional-dashboard" class="hidden dashboard-container">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-prof-appointments">
+          <i class="fa-solid fa-users"></i> Citas Conmigo
+        </button>
+        <button class="tab-btn" data-tab="tab-prof-schedule">
+          <i class="fa-solid fa-gear"></i> Horarios Semanales
+        </button>
+      </div>
+
+      <!-- Citas Conmigo -->
+      <div id="tab-prof-appointments" class="tab-content">
+        <div class="section-header">
+          <h3 class="section-title">Agenda de Estudiantes Reservados</h3>
+          <small class="text-muted">Ordenadas cronológicamente</small>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Estudiante</th>
+                <th>Especialidad</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="prof-appointments-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Carga de Horarios -->
+      <div id="tab-prof-schedule" class="tab-content hidden">
+        <div class="filter-card">
+          <h3 class="section-title">Definir Franjas de Atención</h3>
+          <p class="text-muted">Selecciona las franjas horarias que estarán disponibles para agendar.</p>
+
+          <div class="schedule-grid">
+            <!-- Días de ejemplo -->
+            <div class="day-box">
+              <div class="day-title">Lunes</div>
+              <label class="time-checkbox"><input type="checkbox" checked> 08:00 - 10:00</label>
+              <label class="time-checkbox"><input type="checkbox" checked> 10:00 - 12:00</label>
+              <label class="time-checkbox"><input type="checkbox" checked> 14:00 - 16:00</label>
+            </div>
+            <div class="day-box">
+              <div class="day-title">Martes</div>
+              <label class="time-checkbox"><input type="checkbox" checked> 08:00 - 10:00</label>
+              <label class="time-checkbox"><input type="checkbox"> 10:00 - 12:00</label>
+              <label class="time-checkbox"><input type="checkbox" checked> 14:00 - 16:00</label>
+            </div>
+            <!-- Otros días omitidos por brevedad visual del prototipo -->
+            <div class="day-box">
+              <div class="day-title">Miércoles</div>
+              <label class="time-checkbox"><input type="checkbox" checked> 08:00 - 10:00</label>
+              <label class="time-checkbox"><input type="checkbox" checked> 14:00 - 16:00</label>
+            </div>
+          </div>
+
+          <button id="btn-save-schedule" class="btn-primary">
+            <i class="fa-solid fa-floppy-disk"></i> Guardar Disponibilidad
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast">Notificación</div>
+
+  <!-- Enlace al archivo JS -->
+  <script src="script.js"></script>
+</body>
+</html>
