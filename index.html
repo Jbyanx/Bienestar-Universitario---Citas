@@ -12,11 +12,16 @@
   
   <!-- Enlace al archivo CSS -->
   <link rel="stylesheet" href="styles.css">
+  <script>
+    window.tailwind = window.tailwind || {};
+    window.tailwind.config = { corePlugins: { preflight: false } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
 
   <!-- Barra Superior -->
-  <header id="main-header" class="hidden">
+  <header id="main-header" class="hidden flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between md:px-8">
     <div class="brand">
       <div class="brand-icon"><i class="fa-solid fa-staff-snake"></i></div>
       <span>Bienestar Universitario</span>
@@ -31,13 +36,13 @@
 
   <main>
     <!-- LOGIN (Split Screen) -->
-    <section id="login-screen" class="login-wrapper">
+    <section id="login-screen" class="login-wrapper flex flex-col md:flex-row">
       <!-- Lado izquierdo: Imagen del edificio -->
-      <div class="login-image-side"></div>
+      <div class="login-image-side md:block"></div>
       
       <!-- Lado derecho: Formulario -->
-      <div class="login-form-side">
-        <div class="login-card">
+      <div class="login-form-side w-full md:flex-1">
+        <div class="login-card w-full max-w-[400px]">
           <div class="login-header-brand">
             <!-- Escudo de la universidad -->
             <img src="escudounimag.png" alt="Escudo Universidad" class="login-logo">
@@ -48,11 +53,11 @@
           <form id="login-form">
             <div class="form-group">
               <label for="login-email"><i class="fa-solid fa-envelope"></i> Correo Institucional</label>
-              <input type="email" id="login-email" placeholder="ejemplo@estudiante.com" autocomplete="username" required>
+              <input class="w-full" type="email" id="login-email" placeholder="ejemplo@estudiante.com" autocomplete="username" required>
             </div>
             <div class="form-group">
               <label for="login-password"><i class="fa-solid fa-lock"></i> Contraseña</label>
-              <input type="password" id="login-password" autocomplete="current-password" required>
+              <input class="w-full" type="password" id="login-password" autocomplete="current-password" required>
             </div>
 
             <!-- Listado de Usuarios Mockeados -->
@@ -75,7 +80,7 @@
               </div>
             </details>
 
-            <button type="submit" class="btn-primary">
+            <button type="submit" class="btn-primary w-full">
               <i class="fa-solid fa-right-to-bracket"></i> Entrar al Sistema
             </button>
           </form>
@@ -84,13 +89,13 @@
     </section>
 
     <!-- DASHBOARD ESTUDIANTE -->
-    <section id="student-dashboard" class="hidden dashboard-container">
+    <section id="student-dashboard" class="hidden dashboard-container mx-auto w-full max-w-[1100px] px-4 py-8 md:px-8">
       <div id="reminder-alert" class="reminder-alert hidden" role="status" aria-live="polite"></div>
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="tab-book">
+      <div class="tabs flex flex-col flex-wrap sm:flex-row">
+        <button class="tab-btn active w-full sm:w-auto" data-tab="tab-book">
           <i class="fa-solid fa-calendar-plus"></i> Apartar Cita
         </button>
-        <button class="tab-btn" data-tab="tab-history">
+        <button class="tab-btn w-full sm:w-auto" data-tab="tab-history">
           <i class="fa-solid fa-clock-rotate-left"></i> Mis Citas
         </button>
       </div>
@@ -100,10 +105,10 @@
         <input type="hidden" id="student-id">
         <div class="filter-card">
           <h3 class="section-title"><i class="fa-solid fa-stethoscope"></i> Reserva de Atención</h3>
-          <div class="filter-grid">
+          <div class="filter-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             <div class="form-group">
               <label for="service-select">1. Especialidad Obligatoria *</label>
-              <select id="service-select">
+              <select class="w-full" id="service-select">
                 <option value="">-- Elige Especialidad --</option>
                 <option value="Medicina General">Medicina General</option>
                 <option value="Psicología">Psicología</option>
@@ -112,11 +117,11 @@
             </div>
             <div class="form-group">
               <label for="date-select">2. Fecha de Consulta *</label>
-              <input type="date" id="date-select">
+              <input class="w-full" type="date" id="date-select">
             </div>
             <div class="form-group">
               <label for="prof-filter">3. Profesional (Opcional)</label>
-              <select id="prof-filter" disabled>
+              <select class="w-full" id="prof-filter" disabled>
                 <option value="">Todos los profesionales</option>
               </select>
             </div>
@@ -124,14 +129,14 @@
         </div>
 
         <h4 class="slots-title">Horarios Disponibles</h4>
-        <div id="slots-container" class="slots-grid"></div>
+        <div id="slots-container" class="slots-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"></div>
       </div>
 
       <!-- Mis Citas -->
       <div id="tab-history" class="tab-content hidden">
         <h3 class="section-title">Mi Historial de Citas</h3>
-        <div class="table-responsive">
-          <table>
+        <div class="table-responsive w-full overflow-x-auto">
+          <table class="w-full min-w-[680px] whitespace-nowrap">
             <thead>
               <tr>
                 <th>Especialidad</th>
@@ -149,12 +154,12 @@
     </section>
 
     <!-- DASHBOARD PROFESIONAL -->
-    <section id="professional-dashboard" class="hidden dashboard-container">
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="tab-prof-appointments">
+    <section id="professional-dashboard" class="hidden dashboard-container mx-auto w-full max-w-[1100px] px-4 py-8 md:px-8">
+      <div class="tabs flex flex-col flex-wrap sm:flex-row">
+        <button class="tab-btn active w-full sm:w-auto" data-tab="tab-prof-appointments">
           <i class="fa-solid fa-users"></i> Citas Conmigo
         </button>
-        <button class="tab-btn" data-tab="tab-prof-schedule">
+        <button class="tab-btn w-full sm:w-auto" data-tab="tab-prof-schedule">
           <i class="fa-solid fa-gear"></i> Horarios Semanales
         </button>
       </div>
@@ -165,8 +170,8 @@
           <h3 class="section-title">Agenda de Estudiantes Reservados</h3>
           <small class="text-muted">Ordenadas cronológicamente</small>
         </div>
-        <div class="table-responsive">
-          <table>
+        <div class="table-responsive w-full overflow-x-auto">
+          <table class="w-full min-w-[720px] whitespace-nowrap">
             <thead>
               <tr>
                 <th>Estudiante</th>
@@ -188,7 +193,7 @@
           <h3 class="section-title">Definir Franjas de Atención</h3>
           <p class="text-muted">Selecciona las franjas horarias que estarán disponibles para agendar.</p>
 
-          <div class="schedule-grid">
+          <div class="schedule-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             <div class="day-box" data-day-box="lunes">
               <label class="day-title" for="day-lunes"><input id="day-lunes" class="availability-day" type="checkbox" data-day="lunes" checked> Lunes</label>
               <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00" checked> 08:00 - 10:00</label>
@@ -241,16 +246,16 @@
     </section>
   </main>
 
-  <dialog id="appointment-modal" class="appointment-modal" aria-labelledby="modal-title" aria-describedby="modal-message">
+  <dialog id="appointment-modal" class="appointment-modal mx-auto my-auto w-11/12 max-w-md" aria-labelledby="modal-title" aria-describedby="modal-message">
     <h2 id="modal-title" class="section-title">Notificación</h2>
     <p id="modal-message"></p>
-    <div class="appointment-modal__actions">
-      <button id="modal-cancel" class="btn-logout" type="button" hidden>Volver</button>
-      <button id="modal-confirm" class="btn-primary" type="button">Aceptar</button>
+    <div class="appointment-modal__actions flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <button id="modal-cancel" class="btn-logout w-full sm:w-auto" type="button" hidden>Volver</button>
+      <button id="modal-confirm" class="btn-primary w-full sm:w-auto" type="button">Aceptar</button>
     </div>
   </dialog>
 
-  <div id="toast" class="toast" role="status" aria-live="polite">Notificación</div>
+  <div id="toast" class="toast w-[calc(100vw-2rem)] max-w-md" role="status" aria-live="polite">Notificación</div>
 
   <!-- Datos mockeados y lógica de la aplicación -->
   <script src="mockData.js"></script>
