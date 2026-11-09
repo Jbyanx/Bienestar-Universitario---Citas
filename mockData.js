@@ -51,7 +51,8 @@ const initialBienestarData = {
       especialidad: 'Odontología'
     }
   ],
-  citas: []
+  citas: [],
+  disponibilidad: []
 };
 
 if (localStorage.getItem(BIENESTAR_DB_KEY) === null) {
@@ -67,6 +68,10 @@ if (localStorage.getItem(BIENESTAR_DB_KEY) === null) {
   }
   if (!Array.isArray(storedData.citas)) {
     storedData.citas = [];
+    needsSave = true;
+  }
+  if (!Array.isArray(storedData.disponibilidad)) {
+    storedData.disponibilidad = [];
     needsSave = true;
   }
   if (needsSave) {

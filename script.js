@@ -106,6 +106,7 @@ function showDashboard(user) {
   studentDashboard.classList.add('hidden');
   professionalDashboard.classList.remove('hidden');
   professionalDashboard.querySelector('.tab-btn').click();
+    loadProfessionalAvailability();
   renderProfessionalAppointments();
 }
 
@@ -312,7 +313,7 @@ function getAppointmentStatus(appointment) {
 }
 
 function getBadgeClass(status) {
-  return status === 'PRÓXIMA' ? 'badge-proxima' : 'badge-finalizada';
+  return ['PRÓXIMA', 'PENDIENTE'].includes(status) ? 'badge-proxima' : 'badge-finalizada';
 }
 
 function renderStudentHistory() {
@@ -384,40 +385,151 @@ async function cancelAppointment(appointmentId) {
   renderAvailableSlots();
 }
 
+function getAppointmentDoctorId(appointment) {
+  return appointment.id_doctor ?? appointment.doctorId;
+}
+
+function getAppointmentStudentId(appointment) {
+  return appointment.id_estudiante ?? appointment.estudianteId;
+}
+
+function syncAvailabilityDay(dayInput) {
+  const dayBox = dayInput.closest('.day-box');
+  dayBox.querySelectorAll('.availability-slot').forEach(slot => {
+    slot.disabled = !dayInput.checked;
+  });
+}
+
+function loadProfessionalAvailability() {
+  const data = readData();
+  const saved = (data.disponibilidad || []).find(item =>
+    String(item.id_doctor ?? item.doctorId) === String(currentUser.id)
+  );
+
+  if (saved && Array.isArray(saved.dias)) {
+    document.querySelectorAll('.availability-day').forEach(dayInput => {
+      const savedDay = saved.dias.find(day => day.dia === dayInput.dataset.day);
+      dayInput.checked = Boolean(savedDay);
+      const selectedSlots = new Set(savedDay?.franjas || []);
+      dayInput.closest('.day-box').querySelectorAll('.availability-slot').forEach(slot => {
+        slot.checked = selectedSlots.has(slot.value);
+      });
+    });
+  }
+
+  document.querySelectorAll('.availability-day').forEach(syncAvailabilityDay);
+}
+
+async function saveProfessionalAvailability() {
+  if (!currentUser || currentUser.rol !== 'Profesional') return;
+
+  const days = [...document.querySelectorAll('.availability-day')]
+    .filter(dayInput => dayInput.checked)
+    .map(dayInput => ({
+      dia: dayInput.dataset.day,
+      franjas: [...dayInput.closest('.day-box').querySelectorAll('.availability-slot:checked')]
+        .map(slot => slot.value)
+    }))
+    .filter(day => day.franjas.length > 0);
+
+  const data = readData();
+  if (!Array.isArray(data.disponibilidad)) data.disponibilidad = [];
+  data.disponibilidad = data.disponibilidad.filter(item =>
+    String(item.id_doctor ?? item.doctorId) !== String(currentUser.id)
+  );
+  data.disponibilidad.push({
+    id_doctor: currentUser.id,
+    doctorId: currentUser.id,
+    dias: days,
+    actualizadaEn: new Date().toISOString()
+  });
+  writeData(data);
+
+  await showAppointmentModal({
+    title: 'Disponibilidad actualizada',
+    message: 'Disponibilidad guardada con éxito',
+    confirmLabel: 'Aceptar'
+  });
+}
+
+document.querySelectorAll('.availability-day').forEach(dayInput => {
+  dayInput.addEventListener('change', () => syncAvailabilityDay(dayInput));
+  syncAvailabilityDay(dayInput);
+});
+
+document.getElementById('btn-save-schedule').addEventListener('click', saveProfessionalAvailability);
+
+async function confirmProfessionalAppointment(appointmentId) {
+  const canBeConfirmed = appointment =>
+    String(getAppointmentDoctorId(appointment)) === String(currentUser.id) &&
+    ['PRÓXIMA', 'PENDIENTE'].includes(appointment.estado);
+  const currentAppointment = readData().citas.find(appointment =>
+    String(appointment.id) === String(appointmentId) && canBeConfirmed(appointment)
+  );
+  if (!currentAppointment) return;
+
+  const confirmed = await showAppointmentModal({
+    title: 'Confirmar cita',
+    message: '¿Deseas confirmar esta cita?',
+    confirmLabel: 'Sí, confirmar',
+    cancelLabel: 'Volver'
+  });
+  if (!confirmed) return;
+
+  const data = readData();
+  const appointment = data.citas.find(item =>
+    String(item.id) === String(appointmentId) && canBeConfirmed(item)
+  );
+  if (!appointment) return;
+
+  appointment.estado = 'CONFIRMADA';
+  writeData(data);
+  renderProfessionalAppointments();
+}
+
 function renderProfessionalAppointments() {
   const data = readData();
   const appointments = data.citas
-    .filter(appointment => appointment.doctorId === currentUser.id)
+    .filter(appointment => String(getAppointmentDoctorId(appointment)) === String(currentUser.id))
     .sort((first, second) =>
       new Date(`${first.fecha}T${first.hora}`) - new Date(`${second.fecha}T${second.hora}`)
     );
 
   profAppointmentsBody.replaceChildren();
   if (appointments.length === 0) {
-    profAppointmentsBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No hay estudiantes agendados.</td></tr>';
+    profAppointmentsBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No hay estudiantes agendados.</td></tr>';
     return;
   }
 
   appointments.forEach(appointment => {
-    const student = data.estudiantes.find(item => item.id === appointment.estudianteId);
+    const studentId = getAppointmentStudentId(appointment);
+    const student = data.estudiantes.find(item => String(item.id) === String(studentId));
     const status = getAppointmentStatus(appointment);
     const row = document.createElement('tr');
     row.innerHTML = `
       <td><strong></strong><br><small class="text-muted"></small></td>
-      <td>${currentUser.especialidad}</td>
+      <td>${appointment.especialidad || currentUser.especialidad}</td>
       <td><i class="fa-regular fa-calendar"></i> ${appointment.fecha}</td>
       <td><i class="fa-regular fa-clock"></i> ${appointment.hora}</td>
       <td><span class="badge ${getBadgeClass(status)}">${status}</span></td>
+      <td></td>
     `;
     row.querySelector('strong').textContent = student?.nombre || 'Estudiante no encontrado';
     row.querySelector('small').textContent = student?.correo || '';
+
+    if (['PRÓXIMA', 'PENDIENTE'].includes(appointment.estado) && status === appointment.estado) {
+      const confirmButton = document.createElement('button');
+      confirmButton.type = 'button';
+      confirmButton.className = 'btn-primary';
+      confirmButton.textContent = 'Confirmar';
+      confirmButton.addEventListener('click', () => confirmProfessionalAppointment(appointment.id));
+      row.lastElementChild.appendChild(confirmButton);
+    } else {
+      row.lastElementChild.textContent = '-';
+    }
     profAppointmentsBody.appendChild(row);
   });
 }
-
-document.getElementById('btn-save-schedule').addEventListener('click', () => {
-  showToast('Horarios guardados en sistema');
-});
 
 const savedSession = sessionStorage.getItem('bienestar_session');
 if (savedSession) {

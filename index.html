@@ -139,6 +139,7 @@
                 <th>Hora</th>
                 <th>Estado</th>
                 <th>Acción</th>
+                <th>Acción</th>
               </tr>
             </thead>
             <tbody id="student-history-body"></tbody>
@@ -187,24 +188,47 @@
           <p class="text-muted">Selecciona las franjas horarias que estarán disponibles para agendar.</p>
 
           <div class="schedule-grid">
-            <!-- Días de ejemplo -->
-            <div class="day-box">
-              <div class="day-title">Lunes</div>
-              <label class="time-checkbox"><input type="checkbox" checked> 08:00 - 10:00</label>
-              <label class="time-checkbox"><input type="checkbox" checked> 10:00 - 12:00</label>
-              <label class="time-checkbox"><input type="checkbox" checked> 14:00 - 16:00</label>
+            <div class="day-box" data-day-box="lunes">
+              <label class="day-title" for="day-lunes"><input id="day-lunes" class="availability-day" type="checkbox" data-day="lunes" checked> Lunes</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00" checked> 08:00 - 10:00</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00" checked> 10:00 - 12:00</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00" checked> 14:00 - 16:00</label>
             </div>
-            <div class="day-box">
-              <div class="day-title">Martes</div>
-              <label class="time-checkbox"><input type="checkbox" checked> 08:00 - 10:00</label>
-              <label class="time-checkbox"><input type="checkbox"> 10:00 - 12:00</label>
-              <label class="time-checkbox"><input type="checkbox" checked> 14:00 - 16:00</label>
+            <div class="day-box" data-day-box="martes">
+              <label class="day-title" for="day-martes"><input id="day-martes" class="availability-day" type="checkbox" data-day="martes" checked> Martes</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00" checked> 08:00 - 10:00</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00" checked> 14:00 - 16:00</label>
             </div>
-            <!-- Otros días omitidos por brevedad visual del prototipo -->
-            <div class="day-box">
-              <div class="day-title">Miércoles</div>
-              <label class="time-checkbox"><input type="checkbox" checked> 08:00 - 10:00</label>
-              <label class="time-checkbox"><input type="checkbox" checked> 14:00 - 16:00</label>
+            <div class="day-box" data-day-box="miercoles">
+              <label class="day-title" for="day-miercoles"><input id="day-miercoles" class="availability-day" type="checkbox" data-day="miercoles" checked> Miércoles</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00" checked> 08:00 - 10:00</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00" checked> 14:00 - 16:00</label>
+            </div>
+            <div class="day-box" data-day-box="jueves">
+              <label class="day-title" for="day-jueves"><input id="day-jueves" class="availability-day" type="checkbox" data-day="jueves"> Jueves</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00"> 08:00 - 10:00</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00"> 14:00 - 16:00</label>
+            </div>
+            <div class="day-box" data-day-box="viernes">
+              <label class="day-title" for="day-viernes"><input id="day-viernes" class="availability-day" type="checkbox" data-day="viernes"> Viernes</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00"> 08:00 - 10:00</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00"> 14:00 - 16:00</label>
+            </div>
+            <div class="day-box" data-day-box="sabado">
+              <label class="day-title" for="day-sabado"><input id="day-sabado" class="availability-day" type="checkbox" data-day="sabado"> Sábado</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00"> 08:00 - 10:00</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00"> 14:00 - 16:00</label>
+            </div>
+            <div class="day-box" data-day-box="domingo">
+              <label class="day-title" for="day-domingo"><input id="day-domingo" class="availability-day" type="checkbox" data-day="domingo"> Domingo</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00"> 08:00 - 10:00</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
+              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00"> 14:00 - 16:00</label>
             </div>
           </div>
 
