@@ -19,6 +19,11 @@ const slotsContainer = document.getElementById('slots-container');
 const studentHistoryBody = document.getElementById('student-history-body');
 const profAppointmentsBody = document.getElementById('prof-appointments-body');
 const toast = document.getElementById('toast');
+const appointmentModal = document.getElementById('appointment-modal');
+const modalTitle = document.getElementById('modal-title');
+const modalMessage = document.getElementById('modal-message');
+const modalConfirmButton = document.getElementById('modal-confirm');
+const modalCancelButton = document.getElementById('modal-cancel');
 
 function getLocalDateString(date = new Date()) {
   const year = date.getFullYear();
@@ -48,6 +53,23 @@ function showToast(message) {
   toast.append(icon, document.createTextNode(` ${message}`));
   toast.classList.add('show');
   window.setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function showAppointmentModal({ title, message, confirmLabel, cancelLabel = '' }) {
+  modalTitle.textContent = title;
+  modalMessage.textContent = message;
+  modalConfirmButton.textContent = confirmLabel;
+  modalCancelButton.hidden = !cancelLabel;
+  modalCancelButton.textContent = cancelLabel;
+
+  return new Promise(resolve => {
+    appointmentModal.addEventListener('close', () => {
+      resolve(appointmentModal.returnValue === 'confirm');
+    }, { once: true });
+    modalConfirmButton.onclick = () => appointmentModal.close('confirm');
+    modalCancelButton.onclick = () => appointmentModal.close('cancel');
+    appointmentModal.showModal();
+  });
 }
 
 function getCurrentAccount(session) {
@@ -213,7 +235,8 @@ function renderAvailableSlots() {
       const alreadyBooked = data.citas.some(appointment =>
         appointment.fecha === date &&
         appointment.hora === time &&
-        appointment.doctorId === doctor.id
+        appointment.doctorId === doctor.id &&
+        appointment.estado !== 'CANCELADA'
       );
       if (alreadyBooked) return;
 
@@ -246,35 +269,45 @@ function renderAvailableSlots() {
   }
 }
 
-function bookAppointment(doctor, date, time) {
+async function bookAppointment(doctor, date, time) {
   const data = readData();
   const appointmentExists = data.citas.some(appointment =>
     appointment.fecha === date &&
     appointment.hora === time &&
-    appointment.doctorId === doctor.id
+    appointment.doctorId === doctor.id &&
+    appointment.estado !== 'CANCELADA'
   );
   if (appointmentExists) {
-    alert('Ese horario acaba de ser reservado. Selecciona otro horario.');
     renderAvailableSlots();
+    await showAppointmentModal({
+      title: 'Horario no disponible',
+      message: 'Ese turno acaba de ser reservado. Selecciona otro horario.',
+      confirmLabel: 'Entendido'
+    });
     return;
   }
 
   data.citas.push({
-    id: `CITA-${Date.now()}`,
+    id: `CITA-${crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`}`,
     estudianteId: studentIdInput.value,
     doctorId: doctor.id,
+    especialidad: doctor.especialidad,
     fecha: date,
     hora: time,
     estado: 'PRÓXIMA'
   });
   writeData(data);
-  alert(`Cita apartada con ${doctor.nombre} para el ${date} a las ${time}.`);
   renderAvailableSlots();
   renderStudentHistory();
-  document.querySelector('[data-tab="tab-history"]').click();
+  await showAppointmentModal({
+    title: 'Reserva confirmada',
+    message: 'Cita reservada con éxito',
+    confirmLabel: 'Aceptar'
+  });
 }
 
 function getAppointmentStatus(appointment) {
+  if (appointment.estado === 'CANCELADA') return 'CANCELADA';
   return isAppointmentInPast(appointment.fecha, appointment.hora) ? 'FINALIZADA' : appointment.estado;
 }
 
@@ -292,7 +325,7 @@ function renderStudentHistory() {
 
   studentHistoryBody.replaceChildren();
   if (appointments.length === 0) {
-    studentHistoryBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No tienes citas registradas.</td></tr>';
+    studentHistoryBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No tienes citas registradas.</td></tr>';
     return;
   }
 
@@ -301,35 +334,50 @@ function renderStudentHistory() {
     const status = getAppointmentStatus(appointment);
     const row = document.createElement('tr');
     row.innerHTML = `
-      <td><strong>${doctor?.especialidad || 'Especialidad no disponible'}</strong></td>
+      <td><strong>${appointment.especialidad || doctor?.especialidad || 'Especialidad no disponible'}</strong></td>
       <td></td>
-      <td><i class="fa-regular fa-calendar"></i> ${appointment.fecha}<br><i class="fa-regular fa-clock"></i> ${appointment.hora}</td>
+      <td><i class="fa-regular fa-calendar"></i> ${appointment.fecha}</td>
+      <td><i class="fa-regular fa-clock"></i> ${appointment.hora}</td>
       <td><span class="badge ${getBadgeClass(status)}">${status}</span></td>
       <td></td>
     `;
     row.children[1].textContent = doctor?.nombre || 'Profesional no disponible';
 
-    if (status === 'PRÓXIMA') {
+    if (appointment.estado === 'PRÓXIMA' && status === 'PRÓXIMA') {
       const cancelButton = document.createElement('button');
       cancelButton.type = 'button';
       cancelButton.className = 'cancel-appointment';
       cancelButton.innerHTML = '<i class="fa-solid fa-trash-can"></i> Cancelar';
       cancelButton.style.cssText = 'background:none; border:none; color:#dc2626; cursor:pointer; font-weight:600;';
       cancelButton.addEventListener('click', () => cancelAppointment(appointment.id));
-      row.children[4].appendChild(cancelButton);
+      row.children[5].appendChild(cancelButton);
     } else {
-      row.children[4].textContent = '-';
+      row.children[5].textContent = '-';
     }
     studentHistoryBody.appendChild(row);
   });
 }
 
-function cancelAppointment(appointmentId) {
-  if (!confirm('¿Seguro que deseas cancelar esta cita?')) return;
-  const data = readData();
-  data.citas = data.citas.filter(appointment =>
-    appointment.id !== appointmentId || appointment.estudianteId !== currentUser.id
+async function cancelAppointment(appointmentId) {
+  const currentAppointment = readData().citas.find(appointment =>
+    appointment.id === appointmentId && appointment.estudianteId === currentUser.id
   );
+  if (!currentAppointment || currentAppointment.estado !== 'PRÓXIMA') return;
+
+  const confirmed = await showAppointmentModal({
+    title: 'Cancelar cita',
+    message: '¿Seguro que deseas cancelar esta cita?',
+    confirmLabel: 'Sí, cancelar',
+    cancelLabel: 'Volver'
+  });
+  if (!confirmed) return;
+
+  const data = readData();
+  const appointment = data.citas.find(item =>
+    item.id === appointmentId && item.estudianteId === currentUser.id
+  );
+  if (!appointment || appointment.estado !== 'PRÓXIMA') return;
+  appointment.estado = 'CANCELADA';
   writeData(data);
   showToast('Cita cancelada');
   renderStudentHistory();
@@ -379,5 +427,10 @@ if (savedSession) {
     else sessionStorage.removeItem('bienestar_session');
   } catch {
     sessionStorage.removeItem('bienestar_session');
+  }
+} else {
+  const currentPage = window.location.pathname.split('/').pop();
+  if (currentPage && currentPage !== 'index.html') {
+    window.location.replace('index.html');
   }
 }

@@ -420,6 +420,35 @@ tr:last-child td { border-bottom: none; }
   transform: translateY(0);
 }
 
+.appointment-modal {
+  width: min(92vw, 420px);
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+.appointment-modal::backdrop {
+  background: rgba(15, 23, 42, 0.45);
+}
+.appointment-modal p {
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.appointment-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+.appointment-modal__actions .btn-primary {
+  width: auto;
+}
+.appointment-modal__actions .btn-logout {
+  justify-content: center;
+}
+
 /* Responsive */
 @media (min-width: 900px) {
   .login-image-side {

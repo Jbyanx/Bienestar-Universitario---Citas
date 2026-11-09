@@ -48,7 +48,7 @@
           <form id="login-form">
             <div class="form-group">
               <label for="login-email"><i class="fa-solid fa-envelope"></i> Correo Institucional</label>
-              <input type="email" id="login-email" placeholder="ejemplo@unimagdalena.edu.co" autocomplete="username" required>
+              <input type="email" id="login-email" placeholder="ejemplo@estudiante.com" autocomplete="username" required>
             </div>
             <div class="form-group">
               <label for="login-password"><i class="fa-solid fa-lock"></i> Contraseña</label>
@@ -61,7 +61,7 @@
               <div class="mock-users-content">
                 <strong>Estudiantes:</strong>
                 <ul>
-                  <li>juanperez@unimagdalena.edu.co / 1234</li>
+                  <li>juanperez@estudiante.com / 1234</li>
                   <li>carlos@estudiante.com / 1234</li>
                   <li>andrea@estudiante.com / 1234</li>
                 </ul>
@@ -135,7 +135,8 @@
               <tr>
                 <th>Especialidad</th>
                 <th>Profesional</th>
-                <th>Fecha y Hora</th>
+                <th>Fecha</th>
+                <th>Hora</th>
                 <th>Estado</th>
                 <th>Acción</th>
               </tr>
@@ -215,7 +216,16 @@
     </section>
   </main>
 
-  <div id="toast" class="toast">Notificación</div>
+  <dialog id="appointment-modal" class="appointment-modal" aria-labelledby="modal-title" aria-describedby="modal-message">
+    <h2 id="modal-title" class="section-title">Notificación</h2>
+    <p id="modal-message"></p>
+    <div class="appointment-modal__actions">
+      <button id="modal-cancel" class="btn-logout" type="button" hidden>Volver</button>
+      <button id="modal-confirm" class="btn-primary" type="button">Aceptar</button>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">Notificación</div>
 
   <!-- Datos mockeados y lógica de la aplicación -->
   <script src="mockData.js"></script>

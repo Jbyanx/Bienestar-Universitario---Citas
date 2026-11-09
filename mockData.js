@@ -56,6 +56,22 @@ const initialBienestarData = {
 
 if (localStorage.getItem(BIENESTAR_DB_KEY) === null) {
   localStorage.setItem(BIENESTAR_DB_KEY, JSON.stringify(initialBienestarData));
+} else {
+  const storedData = JSON.parse(localStorage.getItem(BIENESTAR_DB_KEY));
+  const juan = storedData.estudiantes?.find(student => student.id === 'EST-001');
+  let needsSave = false;
+
+  if (juan?.correo === 'juanperez@unimagdalena.edu.co') {
+    juan.correo = 'juanperez@estudiante.com';
+    needsSave = true;
+  }
+  if (!Array.isArray(storedData.citas)) {
+    storedData.citas = [];
+    needsSave = true;
+  }
+  if (needsSave) {
+    localStorage.setItem(BIENESTAR_DB_KEY, JSON.stringify(storedData));
+  }
 }
 
 window.BienestarDB = {
