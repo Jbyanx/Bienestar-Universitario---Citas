@@ -19,6 +19,7 @@ const slotsContainer = document.getElementById('slots-container');
 const studentHistoryBody = document.getElementById('student-history-body');
 const profAppointmentsBody = document.getElementById('prof-appointments-body');
 const toast = document.getElementById('toast');
+const reminderAlert = document.getElementById('reminder-alert');
 const appointmentModal = document.getElementById('appointment-modal');
 const modalTitle = document.getElementById('modal-title');
 const modalMessage = document.getElementById('modal-message');
@@ -53,6 +54,38 @@ function showToast(message) {
   toast.append(icon, document.createTextNode(` ${message}`));
   toast.classList.add('show');
   window.setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function simularCronRecordatorios() {
+  if (!currentUser || currentUser.rol !== 'Estudiante') {
+    reminderAlert.classList.add('hidden');
+    reminderAlert.textContent = '';
+    return;
+  }
+
+  const now = new Date();
+  const twoDaysFromNow = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
+  const nextAppointment = readData().citas
+    .filter(appointment =>
+      String(getAppointmentStudentId(appointment)) === String(currentUser.id) &&
+      appointment.estado === 'PRÓXIMA'
+    )
+    .map(appointment => ({
+      appointment,
+      dateTime: new Date(`${appointment.fecha}T${appointment.hora}:00`)
+    }))
+    .filter(item => item.dateTime >= now && item.dateTime <= twoDaysFromNow)
+    .sort((first, second) => first.dateTime - second.dateTime)[0];
+
+  if (!nextAppointment) {
+    reminderAlert.classList.add('hidden');
+    reminderAlert.textContent = '';
+    return;
+  }
+
+  const { fecha, hora } = nextAppointment.appointment;
+  reminderAlert.textContent = `Recordatorio: Tienes una cita próxima el ${fecha} a las ${hora}.`;
+  reminderAlert.classList.remove('hidden');
 }
 
 function showAppointmentModal({ title, message, confirmLabel, cancelLabel = '' }) {
@@ -100,6 +133,7 @@ function showDashboard(user) {
     studentDashboard.querySelector('.tab-btn').click();
     renderStudentHistory();
     renderAvailableSlots();
+    simularCronRecordatorios();
     return;
   }
 
@@ -114,6 +148,8 @@ function clearSession() {
   currentUser = null;
   sessionStorage.removeItem('bienestar_session');
   studentIdInput.value = '';
+  reminderAlert.classList.add('hidden');
+  reminderAlert.textContent = '';
   mainHeader.classList.add('hidden');
   studentDashboard.classList.add('hidden');
   professionalDashboard.classList.add('hidden');
@@ -300,11 +336,8 @@ async function bookAppointment(doctor, date, time) {
   writeData(data);
   renderAvailableSlots();
   renderStudentHistory();
-  await showAppointmentModal({
-    title: 'Reserva confirmada',
-    message: 'Cita reservada con éxito',
-    confirmLabel: 'Aceptar'
-  });
+  simularCronRecordatorios();
+  showToast(`Simulación de correo enviado a ${currentUser.correo}: Tu cita de ${doctor.especialidad} ha sido confirmada para el ${date} a las ${time}.`);
 }
 
 function getAppointmentStatus(appointment) {
@@ -380,9 +413,10 @@ async function cancelAppointment(appointmentId) {
   if (!appointment || appointment.estado !== 'PRÓXIMA') return;
   appointment.estado = 'CANCELADA';
   writeData(data);
-  showToast('Cita cancelada');
+  showToast('Notificación: La cita ha sido cancelada. Se ha enviado un aviso al profesional.');
   renderStudentHistory();
   renderAvailableSlots();
+  simularCronRecordatorios();
 }
 
 function getAppointmentDoctorId(appointment) {
@@ -487,6 +521,35 @@ async function confirmProfessionalAppointment(appointmentId) {
   renderProfessionalAppointments();
 }
 
+async function cancelProfessionalAppointment(appointmentId) {
+  const canBeCancelled = appointment =>
+    String(getAppointmentDoctorId(appointment)) === String(currentUser.id) &&
+    ['PRÓXIMA', 'PENDIENTE', 'CONFIRMADA'].includes(appointment.estado);
+  const currentAppointment = readData().citas.find(appointment =>
+    String(appointment.id) === String(appointmentId) && canBeCancelled(appointment)
+  );
+  if (!currentAppointment) return;
+
+  const confirmed = await showAppointmentModal({
+    title: 'Cancelar cita',
+    message: '¿Deseas cancelar esta cita? Se notificará al estudiante.',
+    confirmLabel: 'Sí, cancelar',
+    cancelLabel: 'Volver'
+  });
+  if (!confirmed) return;
+
+  const data = readData();
+  const appointment = data.citas.find(item =>
+    String(item.id) === String(appointmentId) && canBeCancelled(item)
+  );
+  if (!appointment) return;
+
+  appointment.estado = 'CANCELADA';
+  writeData(data);
+  renderProfessionalAppointments();
+  showToast('Notificación: La cita ha sido cancelada. Se ha enviado un aviso al estudiante.');
+}
+
 function renderProfessionalAppointments() {
   const data = readData();
   const appointments = data.citas
@@ -517,15 +580,26 @@ function renderProfessionalAppointments() {
     row.querySelector('strong').textContent = student?.nombre || 'Estudiante no encontrado';
     row.querySelector('small').textContent = student?.correo || '';
 
+    const actionCell = row.lastElementChild;
     if (['PRÓXIMA', 'PENDIENTE'].includes(appointment.estado) && status === appointment.estado) {
       const confirmButton = document.createElement('button');
       confirmButton.type = 'button';
       confirmButton.className = 'btn-primary';
       confirmButton.textContent = 'Confirmar';
       confirmButton.addEventListener('click', () => confirmProfessionalAppointment(appointment.id));
-      row.lastElementChild.appendChild(confirmButton);
-    } else {
-      row.lastElementChild.textContent = '-';
+      actionCell.appendChild(confirmButton);
+    }
+    if (['PRÓXIMA', 'PENDIENTE', 'CONFIRMADA'].includes(appointment.estado) && status === appointment.estado) {
+      const cancelButton = document.createElement('button');
+      cancelButton.type = 'button';
+      cancelButton.className = 'cancel-appointment';
+      cancelButton.textContent = 'Cancelar';
+      cancelButton.style.cssText = 'background:none; border:none; color:#dc2626; cursor:pointer; font-weight:600;';
+      cancelButton.addEventListener('click', () => cancelProfessionalAppointment(appointment.id));
+      actionCell.appendChild(cancelButton);
+    }
+    if (!actionCell.hasChildNodes()) {
+      actionCell.textContent = '-';
     }
     profAppointmentsBody.appendChild(row);
   });
