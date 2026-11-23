@@ -1,5 +1,14 @@
 const BIENESTAR_DB_KEY = 'bienestar_db';
 
+function getRelativeLocalDate(offsetDays = 0) {
+  const date = new Date();
+  date.setDate(date.getDate() + offsetDays);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 const initialBienestarData = {
   estudiantes: [
     {
@@ -51,7 +60,36 @@ const initialBienestarData = {
       especialidad: 'Odontología'
     }
   ],
-  citas: [],
+  // Citas iniciales de demostración (activan recordatorio y agenda desde el primer acceso)
+  citas: [
+    {
+      id: 'CITA-DEMO-001',
+      estudianteId: 'EST-001',
+      doctorId: 'PRO-001',
+      especialidad: 'Medicina General',
+      fecha: getRelativeLocalDate(1),
+      hora: '09:00',
+      estado: 'PRÓXIMA'
+    },
+    {
+      id: 'CITA-DEMO-002',
+      estudianteId: 'EST-003',
+      doctorId: 'PRO-001',
+      especialidad: 'Medicina General',
+      fecha: getRelativeLocalDate(1),
+      hora: '10:30',
+      estado: 'CONFIRMADA'
+    },
+    {
+      id: 'CITA-DEMO-003',
+      estudianteId: 'EST-001',
+      doctorId: 'PRO-004',
+      especialidad: 'Odontología',
+      fecha: getRelativeLocalDate(-7),
+      hora: '11:00',
+      estado: 'FINALIZADA'
+    }
+  ],
   disponibilidad: []
 };
 
