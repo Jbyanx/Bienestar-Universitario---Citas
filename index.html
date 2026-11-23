@@ -3,140 +3,269 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bienestar Universitario - Citas</title>
-  
-  <!-- Fuentes e Íconos (FontAwesome) -->
+  <title>Bienestar Universitario - Sistema de Citas</title>
+
+  <!-- Fuentes e Íconos -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Enlace al archivo CSS -->
-  <link rel="stylesheet" href="styles.css">
+
+  <!-- Tailwind CSS (sin preflight para convivir con styles.css) -->
   <script>
     window.tailwind = window.tailwind || {};
     window.tailwind.config = { corePlugins: { preflight: false } };
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Estilos del sistema -->
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <!-- Barra Superior -->
-  <header id="main-header" class="hidden flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between md:px-8">
-    <div class="brand">
-      <div class="brand-icon"><i class="fa-solid fa-staff-snake"></i></div>
-      <span>Bienestar Universitario</span>
-    </div>
-    <div class="user-nav">
-      <span class="user-greeting" id="greeting-text">Hola, bienvenido</span>
-      <button class="btn-logout" id="btn-logout">
-        <i class="fa-solid fa-arrow-right-from-bracket"></i> Salir
-      </button>
+  <header id="main-header" class="app-header hidden">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <i class="fa-solid fa-staff-snake"></i>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">Bienestar Universitario</span>
+          <span class="brand-subtitle">Portal de Citas de Salud</span>
+        </div>
+      </div>
+
+      <div class="user-nav">
+        <div class="user-pill">
+          <span class="user-avatar" id="user-avatar" aria-hidden="true">JP</span>
+          <div class="user-meta">
+            <span class="user-greeting" id="greeting-text">Juan Pérez</span>
+            <span class="user-role-badge" id="user-role-badge">Estudiante</span>
+          </div>
+        </div>
+        <button class="btn-logout" id="btn-logout" type="button" title="Cerrar sesión">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Salir</span>
+        </button>
+      </div>
     </div>
   </header>
 
   <main>
     <!-- LOGIN (Split Screen) -->
-    <section id="login-screen" class="login-wrapper flex flex-col md:flex-row">
-      <!-- Lado izquierdo: Imagen del edificio -->
-      <div class="login-image-side md:block"></div>
-      
+    <section id="login-screen" class="login-wrapper">
+      <!-- Lado izquierdo: Imagen institucional -->
+      <div class="login-image-side">
+        <div class="login-image-overlay">
+          <span class="institution-chip">
+            <i class="fa-solid fa-building-columns"></i> Universidad del Magdalena
+          </span>
+          <h1>Centro de Bienestar Universitario</h1>
+          <p>Consulta disponibilidad, reserva y gestiona tus citas de Medicina General, Odontología y Psicología en menos de 3 minutos.</p>
+          <div class="login-features">
+            <span><i class="fa-solid fa-check-circle"></i> Medicina General</span>
+            <span><i class="fa-solid fa-check-circle"></i> Odontología</span>
+            <span><i class="fa-solid fa-check-circle"></i> Psicología</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Lado derecho: Formulario -->
-      <div class="login-form-side w-full md:flex-1">
-        <div class="login-card w-full max-w-[400px]">
+      <div class="login-form-side">
+        <div class="login-card">
           <div class="login-header-brand">
-            <!-- Escudo de la universidad -->
-            <img src="escudounimag.png" alt="Escudo Universidad" class="login-logo">
+            <img src="escudounimag.png" alt="Escudo Universidad del Magdalena" class="login-logo">
             <h2>Portal de Salud</h2>
-            <p>Bienestar Universitario</p>
+            <p>Bienestar Universitario · Acceso por rol</p>
           </div>
 
-          <form id="login-form">
+          <div id="login-error" class="inline-error hidden" role="alert">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span id="login-error-text">Correo o contraseña incorrectos.</span>
+          </div>
+
+          <form id="login-form" novalidate>
             <div class="form-group">
-              <label for="login-email"><i class="fa-solid fa-envelope"></i> Correo Institucional</label>
-              <input class="w-full" type="email" id="login-email" placeholder="ejemplo@estudiante.com" autocomplete="username" required>
-            </div>
-            <div class="form-group">
-              <label for="login-password"><i class="fa-solid fa-lock"></i> Contraseña</label>
-              <input class="w-full" type="password" id="login-password" autocomplete="current-password" required>
+              <label for="login-email">
+                <i class="fa-solid fa-envelope"></i> Correo Institucional
+              </label>
+              <input
+                type="email"
+                id="login-email"
+                placeholder="ejemplo@estudiante.com"
+                autocomplete="username"
+                required
+              >
             </div>
 
-            <!-- Listado de Usuarios Mockeados -->
-            <details class="mock-users-details">
-              <summary><i class="fa-solid fa-circle-info"></i> Ver usuarios de prueba disponibles</summary>
-              <div class="mock-users-content">
-                <strong>Estudiantes:</strong>
-                <ul>
-                  <li>juanperez@estudiante.com / 1234</li>
-                  <li>carlos@estudiante.com / 1234</li>
-                  <li>andrea@estudiante.com / 1234</li>
-                </ul>
-                <strong>Profesionales:</strong>
-                <ul>
-                  <li>marta.gomez@profesional.com / 1234 (Medicina)</li>
-                  <li>roberto.silva@profesional.com / 1234 (Medicina)</li>
-                  <li>laura.morales@profesional.com / 1234 (Psicología)</li>
-                  <li>viviana.cruz@profesional.com / 1234 (Odontología)</li>
-                </ul>
+            <div class="form-group">
+              <label for="login-password">
+                <i class="fa-solid fa-lock"></i> Contraseña
+              </label>
+              <div class="password-field">
+                <input
+                  type="password"
+                  id="login-password"
+                  placeholder="Ingresa tu contraseña"
+                  autocomplete="current-password"
+                  required
+                >
+                <button type="button" id="toggle-password" class="password-toggle" aria-label="Mostrar u ocultar contraseña">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
               </div>
-            </details>
+            </div>
 
-            <button type="submit" class="btn-primary w-full">
+            <button type="submit" class="btn btn-primary btn-block">
               <i class="fa-solid fa-right-to-bracket"></i> Entrar al Sistema
             </button>
+
+            <!-- Acordeón de Usuarios de Prueba con autorrelleno en 1 clic -->
+            <details class="mock-users-details">
+              <summary>
+                <span class="summary-left">
+                  <i class="fa-solid fa-flask"></i> Usuarios de prueba (clic para autocompletar)
+                </span>
+                <i class="fa-solid fa-chevron-down summary-chevron"></i>
+              </summary>
+              <div class="mock-users-content">
+                <div class="demo-group">
+                  <span class="demo-group-title">Estudiantes</span>
+                  <button type="button" class="demo-user-btn" data-email="juanperez@estudiante.com" data-pass="1234">
+                    <span><strong>Juan Pérez</strong> · juanperez@estudiante.com</span>
+                    <span class="demo-tag">Usar</span>
+                  </button>
+                  <button type="button" class="demo-user-btn" data-email="andrea@estudiante.com" data-pass="1234">
+                    <span><strong>Andrea Ramos</strong> · andrea@estudiante.com</span>
+                    <span class="demo-tag">Usar</span>
+                  </button>
+                  <button type="button" class="demo-user-btn" data-email="carlos@estudiante.com" data-pass="1234">
+                    <span><strong>Carlos Pérez</strong> · carlos@estudiante.com</span>
+                    <span class="demo-tag">Usar</span>
+                  </button>
+                </div>
+
+                <div class="demo-group">
+                  <span class="demo-group-title">Profesionales de Salud</span>
+                  <button type="button" class="demo-user-btn" data-email="marta.gomez@profesional.com" data-pass="1234">
+                    <span><strong>Dra. Marta Gómez</strong> · Medicina General</span>
+                    <span class="demo-tag">Usar</span>
+                  </button>
+                  <button type="button" class="demo-user-btn" data-email="roberto.silva@profesional.com" data-pass="1234">
+                    <span><strong>Dr. Roberto Silva</strong> · Medicina General</span>
+                    <span class="demo-tag">Usar</span>
+                  </button>
+                  <button type="button" class="demo-user-btn" data-email="laura.morales@profesional.com" data-pass="1234">
+                    <span><strong>Dra. Laura Morales</strong> · Psicología</span>
+                    <span class="demo-tag">Usar</span>
+                  </button>
+                  <button type="button" class="demo-user-btn" data-email="viviana.cruz@profesional.com" data-pass="1234">
+                    <span><strong>Dra. Viviana Cruz</strong> · Odontología</span>
+                    <span class="demo-tag">Usar</span>
+                  </button>
+                </div>
+              </div>
+            </details>
           </form>
         </div>
       </div>
     </section>
 
     <!-- DASHBOARD ESTUDIANTE -->
-    <section id="student-dashboard" class="hidden dashboard-container mx-auto w-full max-w-[1100px] px-4 py-8 md:px-8">
-      <div id="reminder-alert" class="reminder-alert hidden" role="status" aria-live="polite"></div>
-      <div class="tabs flex flex-col flex-wrap sm:flex-row">
-        <button class="tab-btn active w-full sm:w-auto" data-tab="tab-book">
-          <i class="fa-solid fa-calendar-plus"></i> Apartar Cita
-        </button>
-        <button class="tab-btn w-full sm:w-auto" data-tab="tab-history">
-          <i class="fa-solid fa-clock-rotate-left"></i> Mis Citas
+    <section id="student-dashboard" class="hidden dashboard-container">
+      <!-- Alerta de recordatorio próxima -->
+      <div id="reminder-alert" class="reminder-alert hidden" role="status" aria-live="polite">
+        <div class="reminder-body">
+          <span class="reminder-icon"><i class="fa-solid fa-bell"></i></span>
+          <div class="reminder-text" id="reminder-alert-text"></div>
+        </div>
+        <button type="button" id="reminder-dismiss" class="reminder-close" aria-label="Ocultar recordatorio">
+          <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <!-- Apartar Cita -->
+      <!-- Navegación por pestañas -->
+      <div class="tabs-bar" role="tablist">
+        <button class="tab-btn active" data-tab="tab-book" role="tab" aria-selected="true" type="button">
+          <i class="fa-solid fa-calendar-plus"></i>
+          <span>Apartar Cita</span>
+        </button>
+        <button class="tab-btn" data-tab="tab-history" role="tab" aria-selected="false" type="button">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>Mis Citas</span>
+          <span id="student-active-count" class="tab-badge hidden">0</span>
+        </button>
+      </div>
+
+      <!-- Pestaña: Apartar Cita -->
       <div id="tab-book" class="tab-content">
         <input type="hidden" id="student-id">
-        <div class="filter-card">
-          <h3 class="section-title"><i class="fa-solid fa-stethoscope"></i> Reserva de Atención</h3>
-          <div class="filter-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+
+        <div class="surface-card filter-card">
+          <div class="card-heading">
+            <h3 class="section-title">
+              <i class="fa-solid fa-stethoscope"></i> Reserva de Atención
+            </h3>
+            <span class="helper-pill">Atención presencial · Sede Bienestar</span>
+          </div>
+
+          <div class="filter-grid">
             <div class="form-group">
-              <label for="service-select">1. Especialidad Obligatoria *</label>
-              <select class="w-full" id="service-select">
-                <option value="">-- Elige Especialidad --</option>
+              <label for="service-select">
+                <span class="step-dot">1</span> Especialidad <span class="required-mark">*</span>
+              </label>
+              <select id="service-select">
+                <option value="">-- Elige una especialidad --</option>
                 <option value="Medicina General">Medicina General</option>
-                <option value="Psicología">Psicología</option>
                 <option value="Odontología">Odontología</option>
+                <option value="Psicología">Psicología</option>
               </select>
             </div>
+
             <div class="form-group">
-              <label for="date-select">2. Fecha de Consulta *</label>
-              <input class="w-full" type="date" id="date-select">
+              <label for="date-select">
+                <span class="step-dot">2</span> Fecha de Consulta <span class="required-mark">*</span>
+              </label>
+              <input type="date" id="date-select">
             </div>
+
             <div class="form-group">
-              <label for="prof-filter">3. Profesional (Opcional)</label>
-              <select class="w-full" id="prof-filter" disabled>
+              <label for="prof-filter">
+                <span class="step-dot">3</span> Profesional <span class="optional-mark">(Opcional)</span>
+              </label>
+              <select id="prof-filter" disabled>
                 <option value="">Todos los profesionales</option>
               </select>
             </div>
           </div>
         </div>
 
-        <h4 class="slots-title">Horarios Disponibles</h4>
-        <div id="slots-container" class="slots-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"></div>
+        <div class="slots-toolbar">
+          <h4 class="slots-title">Horarios Disponibles</h4>
+          <span id="slots-summary" class="slots-summary"></span>
+        </div>
+        <div id="slots-container" class="slots-grid"></div>
       </div>
 
-      <!-- Mis Citas -->
+      <!-- Pestaña: Mis Citas -->
       <div id="tab-history" class="tab-content hidden">
-        <h3 class="section-title">Mi Historial de Citas</h3>
-        <div class="table-responsive w-full overflow-x-auto">
-          <table class="w-full min-w-[680px] whitespace-nowrap">
+        <div class="section-header">
+          <div>
+            <h3 class="section-title">
+              <i class="fa-solid fa-calendar-check"></i> Mi Historial de Citas
+            </h3>
+            <p class="text-muted">Consulta tus próximas atenciones o libera un cupo si no puedes asistir.</p>
+          </div>
+          <div class="filter-pills" id="student-status-filters">
+            <button type="button" class="pill-filter active" data-filter="ALL">Todas</button>
+            <button type="button" class="pill-filter" data-filter="ACTIVE">Activas</button>
+            <button type="button" class="pill-filter" data-filter="PAST">Historial</button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <table class="responsive-table">
             <thead>
               <tr>
                 <th>Especialidad</th>
@@ -144,7 +273,7 @@
                 <th>Fecha</th>
                 <th>Hora</th>
                 <th>Estado</th>
-                <th>Acción</th>
+                <th class="col-action">Acción</th>
               </tr>
             </thead>
             <tbody id="student-history-body"></tbody>
@@ -154,24 +283,37 @@
     </section>
 
     <!-- DASHBOARD PROFESIONAL -->
-    <section id="professional-dashboard" class="hidden dashboard-container mx-auto w-full max-w-[1100px] px-4 py-8 md:px-8">
-      <div class="tabs flex flex-col flex-wrap sm:flex-row">
-        <button class="tab-btn active w-full sm:w-auto" data-tab="tab-prof-appointments">
-          <i class="fa-solid fa-users"></i> Citas Conmigo
+    <section id="professional-dashboard" class="hidden dashboard-container">
+      <div class="tabs-bar" role="tablist">
+        <button class="tab-btn active" data-tab="tab-prof-appointments" role="tab" aria-selected="true" type="button">
+          <i class="fa-solid fa-users"></i>
+          <span>Citas Conmigo</span>
+          <span id="prof-active-count" class="tab-badge hidden">0</span>
         </button>
-        <button class="tab-btn w-full sm:w-auto" data-tab="tab-prof-schedule">
-          <i class="fa-solid fa-gear"></i> Horarios Semanales
+        <button class="tab-btn" data-tab="tab-prof-schedule" role="tab" aria-selected="false" type="button">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Horarios Semanales</span>
         </button>
       </div>
 
-      <!-- Citas Conmigo -->
+      <!-- Pestaña: Agenda Profesional -->
       <div id="tab-prof-appointments" class="tab-content">
         <div class="section-header">
-          <h3 class="section-title">Agenda de Estudiantes Reservados</h3>
-          <small class="text-muted">Ordenadas cronológicamente</small>
+          <div>
+            <h3 class="section-title">
+              <i class="fa-solid fa-clipboard-list"></i> Agenda de Estudiantes Reservados
+            </h3>
+            <p class="text-muted">Ordenadas cronológicamente · Confirma o cancela atenciones.</p>
+          </div>
+          <div class="filter-pills" id="prof-status-filters">
+            <button type="button" class="pill-filter active" data-filter="ALL">Todas</button>
+            <button type="button" class="pill-filter" data-filter="PENDING">Por confirmar</button>
+            <button type="button" class="pill-filter" data-filter="CONFIRMED">Confirmadas</button>
+          </div>
         </div>
-        <div class="table-responsive w-full overflow-x-auto">
-          <table class="w-full min-w-[720px] whitespace-nowrap">
+
+        <div class="table-card">
+          <table class="responsive-table">
             <thead>
               <tr>
                 <th>Estudiante</th>
@@ -179,7 +321,7 @@
                 <th>Fecha</th>
                 <th>Hora</th>
                 <th>Estado</th>
-                <th>Acción</th>
+                <th class="col-action">Acciones</th>
               </tr>
             </thead>
             <tbody id="prof-appointments-body"></tbody>
@@ -187,77 +329,134 @@
         </div>
       </div>
 
-      <!-- Carga de Horarios -->
+      <!-- Pestaña: Horarios Semanales -->
       <div id="tab-prof-schedule" class="tab-content hidden">
-        <div class="filter-card">
-          <h3 class="section-title">Definir Franjas de Atención</h3>
-          <p class="text-muted">Selecciona las franjas horarias que estarán disponibles para agendar.</p>
+        <div class="surface-card">
+          <div class="card-heading">
+            <div>
+              <h3 class="section-title">
+                <i class="fa-solid fa-clock"></i> Definir Franjas de Atención
+              </h3>
+              <p class="text-muted">Activa los días y bloques horarios que se mostrarán disponibles a los estudiantes.</p>
+            </div>
+            <span id="schedule-summary-pill" class="helper-pill">0 días activos</span>
+          </div>
 
-          <div class="schedule-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="schedule-grid">
             <div class="day-box" data-day-box="lunes">
-              <label class="day-title" for="day-lunes"><input id="day-lunes" class="availability-day" type="checkbox" data-day="lunes" checked> Lunes</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00" checked> 08:00 - 10:00</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00" checked> 10:00 - 12:00</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00" checked> 14:00 - 16:00</label>
+              <label class="day-title" for="day-lunes">
+                <input id="day-lunes" class="availability-day" type="checkbox" data-day="lunes" checked>
+                <span>Lunes</span>
+              </label>
+              <div class="day-slots">
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00" checked> 08:00 - 10:00</label>
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00" checked> 10:00 - 12:00</label>
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00" checked> 14:00 - 16:00</label>
+              </div>
             </div>
+
             <div class="day-box" data-day-box="martes">
-              <label class="day-title" for="day-martes"><input id="day-martes" class="availability-day" type="checkbox" data-day="martes" checked> Martes</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00" checked> 08:00 - 10:00</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00" checked> 14:00 - 16:00</label>
+              <label class="day-title" for="day-martes">
+                <input id="day-martes" class="availability-day" type="checkbox" data-day="martes" checked>
+                <span>Martes</span>
+              </label>
+              <div class="day-slots">
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00" checked> 08:00 - 10:00</label>
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00" checked> 14:00 - 16:00</label>
+              </div>
             </div>
+
             <div class="day-box" data-day-box="miercoles">
-              <label class="day-title" for="day-miercoles"><input id="day-miercoles" class="availability-day" type="checkbox" data-day="miercoles" checked> Miércoles</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00" checked> 08:00 - 10:00</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00" checked> 14:00 - 16:00</label>
+              <label class="day-title" for="day-miercoles">
+                <input id="day-miercoles" class="availability-day" type="checkbox" data-day="miercoles" checked>
+                <span>Miércoles</span>
+              </label>
+              <div class="day-slots">
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00" checked> 08:00 - 10:00</label>
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00" checked> 14:00 - 16:00</label>
+              </div>
             </div>
+
             <div class="day-box" data-day-box="jueves">
-              <label class="day-title" for="day-jueves"><input id="day-jueves" class="availability-day" type="checkbox" data-day="jueves"> Jueves</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00"> 08:00 - 10:00</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00"> 14:00 - 16:00</label>
+              <label class="day-title" for="day-jueves">
+                <input id="day-jueves" class="availability-day" type="checkbox" data-day="jueves" checked>
+                <span>Jueves</span>
+              </label>
+              <div class="day-slots">
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00" checked> 08:00 - 10:00</label>
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00" checked> 10:00 - 12:00</label>
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00"> 14:00 - 16:00</label>
+              </div>
             </div>
+
             <div class="day-box" data-day-box="viernes">
-              <label class="day-title" for="day-viernes"><input id="day-viernes" class="availability-day" type="checkbox" data-day="viernes"> Viernes</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00"> 08:00 - 10:00</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00"> 14:00 - 16:00</label>
+              <label class="day-title" for="day-viernes">
+                <input id="day-viernes" class="availability-day" type="checkbox" data-day="viernes" checked>
+                <span>Viernes</span>
+              </label>
+              <div class="day-slots">
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00" checked> 08:00 - 10:00</label>
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00" checked> 14:00 - 16:00</label>
+              </div>
             </div>
+
             <div class="day-box" data-day-box="sabado">
-              <label class="day-title" for="day-sabado"><input id="day-sabado" class="availability-day" type="checkbox" data-day="sabado"> Sábado</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00"> 08:00 - 10:00</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00"> 14:00 - 16:00</label>
+              <label class="day-title" for="day-sabado">
+                <input id="day-sabado" class="availability-day" type="checkbox" data-day="sabado">
+                <span>Sábado</span>
+              </label>
+              <div class="day-slots">
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00"> 08:00 - 10:00</label>
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00"> 14:00 - 16:00</label>
+              </div>
             </div>
+
             <div class="day-box" data-day-box="domingo">
-              <label class="day-title" for="day-domingo"><input id="day-domingo" class="availability-day" type="checkbox" data-day="domingo"> Domingo</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00"> 08:00 - 10:00</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
-              <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00"> 14:00 - 16:00</label>
+              <label class="day-title" for="day-domingo">
+                <input id="day-domingo" class="availability-day" type="checkbox" data-day="domingo">
+                <span>Domingo</span>
+              </label>
+              <div class="day-slots">
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="08:00-10:00"> 08:00 - 10:00</label>
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="10:00-12:00"> 10:00 - 12:00</label>
+                <label class="time-checkbox"><input class="availability-slot" type="checkbox" value="14:00-16:00"> 14:00 - 16:00</label>
+              </div>
             </div>
           </div>
 
-          <button id="btn-save-schedule" class="btn-primary">
-            <i class="fa-solid fa-floppy-disk"></i> Guardar Disponibilidad
-          </button>
+          <div class="schedule-actions">
+            <button id="btn-save-schedule" class="btn btn-success" type="button">
+              <i class="fa-solid fa-floppy-disk"></i> Guardar Disponibilidad
+            </button>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <dialog id="appointment-modal" class="appointment-modal mx-auto my-auto w-11/12 max-w-md" aria-labelledby="modal-title" aria-describedby="modal-message">
-    <h2 id="modal-title" class="section-title">Notificación</h2>
-    <p id="modal-message"></p>
-    <div class="appointment-modal__actions flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-      <button id="modal-cancel" class="btn-logout w-full sm:w-auto" type="button" hidden>Volver</button>
-      <button id="modal-confirm" class="btn-primary w-full sm:w-auto" type="button">Aceptar</button>
+  <!-- Modal reutilizable -->
+  <dialog id="appointment-modal" class="appointment-modal" aria-labelledby="modal-title" aria-describedby="modal-message">
+    <div class="modal-header">
+      <span id="modal-icon" class="modal-icon modal-icon--primary" aria-hidden="true">
+        <i class="fa-solid fa-circle-info"></i>
+      </span>
+      <h2 id="modal-title" class="modal-title">Notificación</h2>
+    </div>
+    <p id="modal-message" class="modal-message"></p>
+    <div class="appointment-modal__actions">
+      <button id="modal-cancel" class="btn btn-secondary" type="button" hidden>Volver</button>
+      <button id="modal-confirm" class="btn btn-primary" type="button">Aceptar</button>
     </div>
   </dialog>
 
-  <div id="toast" class="toast w-[calc(100vw-2rem)] max-w-md" role="status" aria-live="polite">Notificación</div>
+  <!-- Toast de notificaciones -->
+  <div id="toast" class="toast toast--info" role="status" aria-live="polite"></div>
 
-  <!-- Datos mockeados y lógica de la aplicación -->
+  <!-- Datos mockeados y lógica -->
   <script src="mockData.js"></script>
   <script src="script.js"></script>
 </body>
